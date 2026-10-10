@@ -268,9 +268,14 @@
       if (!imageMode && text) history.push({ role: "user", text: prompt }, { role: "ai", text });
       if (history.length > 20) history = history.slice(-20);
     } catch (e) {
-      bubble.innerHTML = e.message === "NO_KEY"
-        ? "<p>⚠️ Add your Gemini API key in the sidebar to start.</p>"
-        : `<p>❌ ${escapeHtml(e.message)}</p><p class="hint">Tip: check your key, model access, and billing at Google AI Studio.</p>`;
+      const msg = e.message || "";
+      if (msg === "NO_KEY") {
+        bubble.innerHTML = "<p>⚠️ Add your Gemini API key in the sidebar to start.</p>";
+      } else if (/503|overload|UNAVAILABLE/i.test(msg)) {
+        bubble.innerHTML = `<p>⚠️ <b>Model is busy right now (503)</b> — Google's servers are temporarily overloaded. This usually clears within a minute or two.</p><p class="hint">Just hit ➤ to retry, or pick a <b>Flash</b> model in the sidebar — they're faster and rarely busy compared to Pro models.</p>`;
+      } else {
+        bubble.innerHTML = `<p>❌ ${escapeHtml(msg)}</p><p class="hint">Tip: check your key, model access, and billing at Google AI Studio.</p>`;
+      }
     }
     setStatus(false, "Ready");
     chat.scrollTop = chat.scrollHeight;
