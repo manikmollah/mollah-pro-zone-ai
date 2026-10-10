@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mollah Pro Zone Ai — Developer AI Studio</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <h1>Mollah Pro Zone <span>Ai</span></h1>
+        <p>Developer AI Studio</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>🔑 API Key</h2>
+      <input type="password" id="apiKey" placeholder="Paste your Gemini API key" autocomplete="off" />
+      <div class="row">
+        <button class="btn small" id="saveKey">Save key</button>
+        <button class="btn small ghost" id="clearKey">Clear</button>
+      </div>
+      <p class="hint">Your key stays in <b>your browser only</b> (localStorage). It is never sent anywhere except Google's Gemini API, and never stored in this site's code.</p>
+      <a class="hint link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key from Google AI Studio →</a>
+    </div>
+
+    <div class="panel">
+      <h2>🧠 Model</h2>
+      <select id="modelSelect"><option>Loading models…</option></select>
+      <div class="row">
+        <button class="btn small ghost" id="refreshModels">↻ Refresh models</button>
+      </div>
+      <p class="hint" id="modelHint">Strongest coding model is auto-selected.</p>
+    </div>
+
+    <div class="panel">
+      <h2>🎨 Mode</h2>
+      <div class="modes">
+        <button class="mode active" data-mode="code">💻 Code</button>
+        <button class="mode" data-mode="chat">💬 Chat</button>
+        <button class="mode" data-mode="image">🖼️ Image</button>
+      </div>
+      <p class="hint">Code mode = expert senior developer. Image mode uses Gemini's image generation model.</p>
+    </div>
+
+    <div class="panel">
+      <h2>📁 Project</h2>
+      <button class="btn" id="saveProject">⬇ Save all code to device…</button>
+      <p class="hint">Picks a folder on <b>your device</b> and writes every code block from the chat as files.</p>
+      <button class="btn ghost" id="newChat">＋ New chat</button>
+    </div>
+
+    <div class="foot">Built for developers · Powered by Gemini</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="menuBtn">☰</button>
+      <div class="title">Mollah Pro Zone Ai</div>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">Ready</span></div>
+    </header>
+
+    <div class="chat" id="chat">
+      <div class="welcome">
+        <div class="welcome-logo">⚡</div>
+        <h2>Welcome to Mollah Pro Zone Ai</h2>
+        <p>Your coding-first AI studio. Paste your Gemini API key in the sidebar, then ask anything — full apps, debugging, refactors, explanations.</p>
+        <div class="chips">
+          <button class="chip" data-prompt="Build a beautiful responsive landing page for a coffee brand with HTML, CSS and JS in one file.">☕ Landing page</button>
+          <button class="chip" data-prompt="Write a Python script that renames all files in a folder by date, with error handling and a dry-run flag.">🐍 Python script</button>
+          <button class="chip" data-prompt="Explain this JavaScript closure bug and fix it: for (var i = 0; i < 5; i++) { setTimeout(() => console.log(i), 100); }">🐞 Fix a bug</button>
+          <button class="chip" data-prompt="Design a REST API for a todo app with auth, in Node.js + Express, with folder structure.">🔌 REST API design</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <textarea id="input" rows="2" placeholder="Ask Mollah Pro Zone Ai anything… (Shift+Enter for new line)"></textarea>
+      <button class="send" id="send">➤</button>
+    </div>
+    <p class="disclaimer">AI can make mistakes — review generated code before running it. Image/video features depend on model availability in your region.</p>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
