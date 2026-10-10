@@ -224,7 +224,9 @@
           return { data, fallback: model !== primary, model };
         } catch (e) {
           lastErr = e;
-          if (!/503|overload|UNAVAILABLE|429/i.test(e.message || "")) throw e;
+          const m = e.message || "";
+          if (/quota|billing/i.test(m)) throw e; // hard quota limit — retrying won't help
+          if (!/503|overload|UNAVAILABLE/i.test(m)) throw e;
           setStatus(true, `Model busy — retrying (${attempt + 1}/3)…`);
           await sleep(2000 * (attempt + 1));
         }
@@ -293,6 +295,8 @@
       const msg = e.message || "";
       if (msg === "NO_KEY") {
         bubble.innerHTML = "<p>⚠️ Add your Gemini API key in the sidebar to start.</p>";
+      } else if (/429|quota|billing/i.test(msg)) {
+        bubble.innerHTML = `<p>⚠️ <b>Quota exceeded (429)</b> — this API key has hit its usage limit.</p><p class="hint">Check your plan & billing at <b>aistudio.google.com</b> → API keys → quota. Free-tier limits reset over time; enabling billing raises them. Retrying right now won't help — wait or switch to a key with remaining quota.</p>`;
       } else if (/503|overload|UNAVAILABLE/i.test(msg)) {
         bubble.innerHTML = `<p>⚠️ <b>Model is busy right now (503)</b> — Google's servers are temporarily overloaded. This usually clears within a minute or two.</p><p class="hint">Just hit ➤ to retry, or pick a <b>Flash</b> model in the sidebar — they're faster and rarely busy compared to Pro models.</p>`;
       } else {
