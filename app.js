@@ -208,13 +208,34 @@
 
   $("newChat").onclick = () => { history = []; chat.innerHTML = ""; location.reload(); };
 
+  const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  // Retry on overload (503/429) with backoff, then fall back to lighter Flash models
   async function callGemini(prompt, imageMode) {
     const key = getKey();
     if (!key) throw new Error("NO_KEY");
-    let model = modelSelect.value;
+    const primary = imageMode ? IMAGE_MODELS[0] : modelSelect.value;
+    const chain = imageMode ? [primary] : [...new Set([primary, "gemini-2.0-flash", "gemini-2.5-flash"])];
+    let lastErr = null;
+    for (const model of chain) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const data = await tryModel(key, model, prompt, imageMode);
+          return { data, fallback: model !== primary, model };
+        } catch (e) {
+          lastErr = e;
+          if (!/503|overload|UNAVAILABLE|429/i.test(e.message || "")) throw e;
+          setStatus(true, `Model busy — retrying (${attempt + 1}/3)…`);
+          await sleep(2000 * (attempt + 1));
+        }
+      }
+    }
+    throw lastErr;
+  }
+
+  async function tryModel(key, model, prompt, imageMode) {
     let body;
     if (imageMode) {
-      model = IMAGE_MODELS[0];
       body = {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
@@ -261,10 +282,11 @@
     setStatus(true, "Thinking…");
     try {
       const imageMode = mode === "image";
-      const data = await callGemini(prompt, imageMode);
+      const { data, fallback, model: usedModel } = await callGemini(prompt, imageMode);
       const img = extractImage(data);
       const text = extractText(data) || (img ? "" : "No response — try again.");
-      bubble.innerHTML = renderMarkdown(text) + (img ? `<img class="gen" src="${img}" alt="Generated image"/>` : "");
+      bubble.innerHTML = renderMarkdown(text) + (img ? `<img class="gen" src="${img}" alt="Generated image"/>` : "") +
+        (fallback ? `<p class="hint">ℹ️ Your selected model was overloaded, so I answered with <b>${escapeHtml(usedModel)}</b> instead.</p>` : "");
       if (!imageMode && text) history.push({ role: "user", text: prompt }, { role: "ai", text });
       if (history.length > 20) history = history.slice(-20);
     } catch (e) {
